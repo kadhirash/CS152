@@ -10,7 +10,9 @@
 /*
 	Rules
 */
-
+DIGIT [0-9]
+UNDERSCORE [_]
+ALPHA [A-Za-z]
 %%
 			/* Reserved Words */
 
@@ -53,8 +55,9 @@
 ">="		{printf("GTE\n"); curr_pos += yyleng;}
 
 			/* Identifiers and Numbers */
-[A-zA-Z]+((_|[0-9]|[A-zA-Z])*([0-9]|[A-zA-Z])+)*	{printf("IDENT %s\n", yytext); curr_pos += yyleng;}
-[0-9]+		{printf("NUMBER %s\n", yytext); curr_pos += yyleng;}
+{ALPHA}+(({UNDERSCORE}|{DIGIT}|{ALPHA})*({DIGIT}|{ALPHA})+)*		{printf("IDENT %s\n", yytext); curr_pos += yyleng;}
+
+{DIGIT}+		{printf("NUMBER %s\n", yytext); curr_pos += yyleng;}
 	
 			/* Other Special Symbols*/
 ";"            	{printf("SEMICOLON\n"); curr_pos += yyleng;}
@@ -70,11 +73,12 @@
 "\n"		{curr_line++; curr_pos = 1;}
 
 	/* Error Handling*/
-.	{printf("Error at line %d, column %d: unrecognized symbol \"%s\"\n", curr_line, curr_pos, yytext); exit(0);}
 
-([0-9]|_)+(_|[0-9]|[A-zA-Z])*[A-zA-Z]+	{printf("Error at line %d, column %d: identifier \"%s\" must begin with a letter\n", curr_line, curr_pos, yytext); exit(0);}
+({DIGIT}|{UNDERSCORE})+({UNDERSCORE}|{DIGIT}|{ALPHA})*{ALPHA}+	{printf("Error at line %d, column %d: identifier \"%s\" must begin with a letter\n", curr_line, curr_pos, yytext); exit(0);}
 
-([A-zA-Z])+(_|[0-9]|[A-zA-Z])*["_"]+	{printf("Error at line %d, column %d: identifier \"%s\" cannot end with an underscore\n", curr_line, curr_pos, yytext); exit(0);}
+{ALPHA}+({UNDERSCORE}|{DIGIT}|{ALPHA})*{UNDERSCORE}+			{printf("Error at line %d, column %d: identifier \"%s\" cannot end with an underscore\n", curr_line, curr_pos, yytext); exit(0);}
+
+.       {printf("Error at line %d, column %d: unrecognized symbol \"%s\"\n", curr_line, curr_pos, yytext); exit(0);}
 %%
 
 int main(int argc, char ** argv)
